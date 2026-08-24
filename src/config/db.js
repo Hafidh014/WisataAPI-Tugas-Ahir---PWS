@@ -1,10 +1,12 @@
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
+
 dotenv.config();
 
-// Mendukung format .env manual PostgreSQL maupun DATABASE_URL.
-const databaseConfig = process.env.DATABASE_URL
-  ? { connectionString: process.env.DATABASE_URL }
+// Mendukung POSTGRES_URL untuk Vercel
+// maupun format .env manual PostgreSQL
+const databaseConfig = process.env.POSTGRES_URL
+  ? { connectionString: process.env.POSTGRES_URL }
   : {
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
@@ -15,10 +17,16 @@ const databaseConfig = process.env.DATABASE_URL
 
 const pool = new Pool({
   ...databaseConfig,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
   max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 10000,
 });
 
-module.exports = { query: (text, params) => pool.query(text, params), pool };
+module.exports = {
+  query: (text, params) => pool.query(text, params),
+  pool,
+};
